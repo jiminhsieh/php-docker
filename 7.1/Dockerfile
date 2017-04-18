@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y \
 		libsqlite3-0 \
 		libxml2 \
 		xz-utils \
+# Additional dependency, due to Ubuntu LTS base
 		libcurl3 \
 	--no-install-recommends && rm -r /var/lib/apt/lists/*
 
