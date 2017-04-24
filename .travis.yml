@@ -2,23 +2,35 @@ language: bash
 services: docker
 
 env:
-  - VERSION=7.1 VARIANT=
-  - VERSION=5.6 VARIANT=
+
+  - VERSION=7.1 TAG_1=latest  TAG_3=7       TAG_4=7.1     TAG_5=7.1.4       TAG_6=cli TAG_7=7-cli TAG_8=7.1-cli TAG_9=7.1.4-cli
+  - VERSION=7.0 TAG_1=7.0     TAG_3=7.0.18  TAG_4=7.0-cli TAG_5=7.0.18-cli
+  - VERSION=5.6 TAG_1=5       TAG_3=5.6.30  TAG_4=5-cli   TAG_5=5.6-cli     TAG_6=5.6.30-cli
 
 install:
   - git clone https://github.com/docker-library/official-images.git ~/official-images
 
 before_script:
   - env | sort
-  - cd "$VERSION"
-  - image="php:${VERSION}${VARIANT:+-$VARIANT}"
-  - image="${image//'/'/-}"
+  - cd "${VERSION}${VARIANT:+/$VARIANT}"
+  - IMAGE_REPOSITORY="${DOCKER_HUB_USERNAME}/php"
+  - image="${IMAGE_REPOSITORY}:${VERSION}${VARIANT:+-$VARIANT}"
 
 script:
-  - travis_retry docker build -t "$image" "${VARIANT:-.}"
+  - travis_retry docker build -t "$image" .
   - ~/official-images/test/run.sh "$image"
 
-after_script:
+after_success:
+  - if [ "$TAG_1" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_1}" ; fi
+  - if [ "$TAG_2" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_2}" ; fi
+  - if [ "$TAG_3" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_3}" ; fi
+  - if [ "$TAG_4" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_4}" ; fi
+  - if [ "$TAG_5" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_5}" ; fi
+  - if [ "$TAG_6" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_6}" ; fi
+  - if [ "$TAG_7" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_7}" ; fi
+  - if [ "$TAG_8" != "" ]; then docker tag "${image}" "$IMAGE_REPOSITORY:${TAG_8}" ; fi
   - docker images
+  - docker login -u ${DOCKER_HUB_USERNAME} -p ${DOCKER_HUB_PASSWORD}
+  - docker push ${IMAGE_REPOSITORY}
 
 # vim:set et ts=2 sw=2:
